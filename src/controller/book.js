@@ -50,22 +50,41 @@ exports.getBooksByIsbn = async (req, res) => {
 exports.editBook = async (req, res) => {
     // take the isbn number from params as its unique
     const { isbn } = req.params;
+    const { title, author, genre } = req.body;
+
+    try {
+        const updatedBook = await db('books').where({ isbn }).update({ title, author, genre });
+        if(!updatedBook){
+            return res.status(401).json({ msg: "Something went wrong while deleting!!"})
+        }
+
+        return res.status(200).json({
+            updatedBook,
+            msg: "Book Updated successfully"
+        })
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 exports.deleteBook = async (req, res) => {
     const { isbn } = req.params;
 
-    const book = await db('books').where({isbn}).select("*");
-    if (book.length === 0) {
-        return res.status(404).json({msg: "Np such book found!!"})
-    }
+    try {
+        const book = await db('books').where({isbn}).select("*");
+        if (book.length === 0) {
+            return res.status(404).json({msg: "Np such book found!!"})
+        }
     
-    const deletedBook = await db('books').where({isbn}).del();
-    if (!deletedBook) {
-        return res.status(401).json({msg: "Something went wrong while deleting book!!"})
-    } 
-
-    return res.status(200).json({ msg: "Book deleted"})
+        const deletedBook = await db('books').where({isbn}).del();
+        if (!deletedBook) {
+            return res.status(401).json({msg: "Something went wrong while deleting book!!"})
+        } 
+    
+        return res.status(200).json({ msg: "Book deleted"})
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 // module.exports = {
